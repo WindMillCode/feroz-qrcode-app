@@ -1,6 +1,5 @@
 import sys
 import os
-import mimetypes
 if sys.platform == "win32":
     sys.path.append(sys.path[0] + "\\site-packages\\windows")
 elif sys.platform =="linux":
@@ -9,8 +8,8 @@ from flask import Flask, request, redirect
 from pyngrok import ngrok
 
 # dev additions
+import mimetypes
 from flask_socketio import SocketIO
-from twilio.twiml.messaging_response import MessagingResponse
 import boto3
 session_client = boto3.client(
     'sts',

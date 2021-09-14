@@ -35,7 +35,7 @@ Only members of the project can read the README.md from the ignore folder
 * puffing billy v2.4.1
 
 ## Hosting
-
+* netlify
 ### CMS
 
 
