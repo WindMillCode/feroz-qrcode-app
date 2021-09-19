@@ -6,7 +6,7 @@ import LoginPod from './components/login/loginPod'
 import UploadPod from './components/upload/uploadPod';
 import NFTSPod from './components/ntfs/nftsPod';
 import { Route, Switch, useHistory } from 'react-router-dom';
-import {env} from './env/dev';
+import {env} from './env/prod';
 
 
 
