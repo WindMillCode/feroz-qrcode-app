@@ -1,6 +1,6 @@
 import React , {useState,useEffect} from 'react';
 import './App.scss';
-import { mediaPrefix,NftsItems,conversion } from './customExports'
+import { mediaPrefix,NftsItems,ipfs_conversion } from './customExports'
 import NavPod from './components/nav/navPod'
 import LoginPod from './components/login/loginPod'
 import UploadPod from './components/upload/uploadPod';
@@ -14,14 +14,18 @@ function App() {
 
     let history = useHistory();
     let [nftsItems,setNftsItems] = useState<NftsItems[]>([]);
+
+    window.addEventListener('resize',()=>{
+        console.log(window.innerWidth)
+    })
     useEffect(()=>{
-        fetch(`${env.backend.url}/list/${env.creds.user}`)
+        fetch(`${env.backend.url}/ipfs_list/${env.creds.user}`)
         .then(res=>res.json())
         .then(res=>{
-            conversion({
+            console.log(res)
+            ipfs_conversion({
                 items:res.message.files,
-                setFn:setNftsItems,
-                bucket:env.creds.bucket
+                setFn:setNftsItems
             })
         })
         .catch(console.error)        

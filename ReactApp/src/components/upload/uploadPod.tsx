@@ -23,7 +23,7 @@ export default function UploadPod(props:Props){
             onChange:()=>{
 
                 
-                fetch(`${props.env.backend.url}/upload/${props.env.creds.user}`,{method:"POST",body:upload.file.element.files?.[0]})
+                fetch(`${props.env.backend.url}/ipfs_upload/${props.env.creds.user}`,{method:"POST",body:upload.file.element.files?.[0]})
                 .then(res=>res.json())
                 .then(res=>{
                     console.log(res)
@@ -66,7 +66,9 @@ export default function UploadPod(props:Props){
                         className={prefix0({val:'Button'})}
                         >{upload.button.text}</button>
                     </div>
-                    <QRCode value={upload.qrcode.value}/>
+                    <div style ={{border:"10px solid white"}}>
+                        <QRCode value={upload.qrcode.value}/>
+                    </div>
                 </div>
             </div>
         </div>

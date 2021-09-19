@@ -8,6 +8,8 @@ from flask import Flask, request, redirect
 from pyngrok import ngrok
 
 # dev additions
+import pprint
+import requests
 import mimetypes
 from flask_socketio import SocketIO
 import boto3
@@ -52,8 +54,8 @@ def connect():
     print("connected")
 
 
-@app.route('/list/<user>',methods=['GET'])
-def list_files(user):
+@app.route('/aws_list/<user>',methods=['GET'])
+def aws_list_files(user):
     response = s3_client.list_objects_v2(
         Bucket=os.getenv('S3_BUCKET_NAME'),
         Prefix=user
@@ -65,17 +67,38 @@ def list_files(user):
         }
     }
 
-@app.route('/upload/<user>', methods=['POST'])
-def file_upload(user):
+@app.route('/ipfs_list/<user>',methods=['GET'])
+def ipfs_list_files(user):
+    url = "https://api.nft.storage"
+    headers={
+        "Authorization":"Bearer {}".format(os.getenv('IPFS_API_KEY'))
+    }
+    # get a number list of the file
+    resp = requests.get(
+        url,
+        headers=headers
+    )
+  
+
+    #  
+    return {
+        'status':200,
+        'message':{
+            'files':resp.json().get('value')
+        }
+    }
+
+@app.route('/aws_upload/<user>', methods=['POST'])
+def aws_file_upload(user):
     
     # get a number list of the file
-    response = s3_client.list_objects_v2(
+    resp = s3_client.list_objects_v2(
         Bucket=os.getenv('S3_BUCKET_NAME'),
         Prefix=user
     )
     contents = 0 
     try:
-        contents = len(response.get('Contents'))
+        contents = len(resp.get('Contents'))
     except BaseException as e:
         None
     #  
@@ -117,7 +140,67 @@ def file_upload(user):
             )
         }
     }
+
+
+@app.route('/ipfs_upload/<user>', methods=['POST','GET'])
+def ipfs_file_upload(user):
     
+    url = "https://api.nft.storage"
+    headers={
+        "Authorization":"Bearer {}".format(os.getenv('IPFS_API_KEY'))
+    }
+    # get a number list of the file
+    resp = requests.get(
+        url,
+        headers=headers
+    )
+    contents = 0 
+    try:
+        contents = len(resp.get('value'))
+    except BaseException as e:
+        None    
+
+    #  
+
+    # get the file mimetype extension
+    ext  = mimetypes.guess_extension(request.headers.get('Content-Type'))
+    # 
+    
+    # upload to s3 and get the url
+    filename = '{}-{}{}'.format(user,contents,ext)
+    cid = ""
+    with open(filename, 'wb') as f:
+        f.write(request.data)
+        f.close()
+    with open(filename, 'rb') as f:
+
+        resp = requests.post(
+            url+"/upload",
+            headers=headers,
+            data=f
+        )
+        result  = resp.json()
+        cid = result.get('value').get("cid")
+        pprint.pprint(resp.json())
+        f.close()
+    if os.path.exists(filename):
+        os.remove(filename)         
+    # 
+
+    # update the current list in the frontend
+    sio.emit('update',{'new':'true'})
+    # 
+    
+    return {
+        'status': 200,
+        'message':{
+            'message':'OK',
+            'object_url': "https://ipfs.io/ipfs/{}".format(
+                cid,
+            )
+        }
+    }
+       
 
 
 if __name__ == "__main__":

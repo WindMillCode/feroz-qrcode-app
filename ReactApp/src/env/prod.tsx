@@ -1,7 +1,7 @@
 
 export  let  env = {
     backend:{
-        url:"http://localhost:5000"
+        url:"https://feroz-qrcode-app.herokuapp.com"
     },
     creds:{
         user:"feroz",
